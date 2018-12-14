@@ -21,8 +21,7 @@ class ProductRouter {
             })
             .catch((err) => {
                 res.status(404).send({
-                    err:Error,
-                    status
+                    err: Error
                 })
                 console.log(err);
             })
@@ -37,7 +36,7 @@ class ProductRouter {
                 if (!object) {
                     return res.status(404).send();
                 }
-                res.send( JSON.stringify(object) );
+                res.send(JSON.stringify(object));
             }).catch((err) => {
                 res.status(400).send(err);
             })
@@ -48,10 +47,10 @@ class ProductRouter {
         let product = new Product({
             createdAt: new Date().getTime(),
             title: req.body.title,
-            subtitle:req.body.subtitle,
+            subtitle: req.body.subtitle,
             price: req.body.price,
             image: req.body.image,
-            text:req.body.text
+            text: req.body.text
         })
 
         product.save().then((doc) => {
@@ -73,8 +72,8 @@ class ProductRouter {
         }
     }
 
-    public UpdateProduct(req:Request,res:Response):void{
-        
+    public UpdateProduct(req: Request, res: Response): void {
+
     }
 
 
