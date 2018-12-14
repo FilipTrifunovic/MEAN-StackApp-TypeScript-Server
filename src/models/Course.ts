@@ -1,7 +1,12 @@
 import { Schema,model, Document,Model  } from 'mongoose';
 import { ICourse} from './Interface/ICourse';
 
-export interface ICourseModel extends ICourse,Document{}
+export interface ICourseModel extends ICourse,Document{
+    // cart:{
+    //     productId:Schema.Types.ObjectId,
+    //     quantity:string
+    // }
+}
 
 let CourseSchema:Schema = new Schema({
     createdAt:Date,
@@ -36,9 +41,18 @@ let CourseSchema:Schema = new Schema({
         required:true
     },
     steps:{
+        
         type:[String],
         required:true,
-    }
+    },
+    //embeded item
+    // cart:{
+    //     productId : {type:Schema.Types.ObjectId,
+    //                  required:true
+    //                  ref:'Product '
+    //                  },
+    //     quantity:    { type:Number,required:true}
+    // }
 
 })
 

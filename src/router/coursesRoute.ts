@@ -15,6 +15,7 @@ class CoursesRoute {
 
     public GetCourses(req: Request, res: Response): void {
         Course.find({})
+        .select('title description -_id')
             .then((data) => {
                 res.status(200).send({
                     data
@@ -87,8 +88,11 @@ class CoursesRoute {
         // })
         Course.findOne({title:courseTitle}).then((course:ICourseModel)=>{
             course.length=length;
-            course.save();
-        })
+            return course.save()
+        }).then(result=>{
+            console.log(`Course Updated`);
+            res.status(200).send(`Course Updated`)
+        }).catch(err=>{console.log(err)})
     }
 
 
