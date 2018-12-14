@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Faq from "../models/Faq";
+import { Faq } from "../models/Faq";
 
 export class FaqRoute{
 

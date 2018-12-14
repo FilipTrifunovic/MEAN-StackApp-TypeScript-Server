@@ -1,6 +1,7 @@
-import { Schema,model } from 'mongoose';
+import { Schema,model, Document, Model } from 'mongoose';
+import { IFaq } from './Interface/IFaq';
 
-
+export interface IFaqModel extends IFaq,Document{}
 
 let FaqSchema:Schema = new Schema({
     createdAt:Date,
@@ -16,4 +17,5 @@ let FaqSchema:Schema = new Schema({
     }
 })
 
-export default model('Faq',FaqSchema)
+export const Faq:Model<IFaqModel> = model<IFaqModel>('Faq',FaqSchema)
+//export default model('Faq',FaqSchema)
