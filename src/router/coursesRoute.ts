@@ -1,5 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Course from "../models/Course";
+import {Course, ICourseModel} from "../models/Course";
+
+
 
 class CoursesRoute {
 
@@ -78,7 +80,15 @@ class CoursesRoute {
     }
 
     public UpdateCourse(req:Request,res:Response):void{
-        
+        const courseTitle=req.body.title
+        const length=req.body.length;
+        // Course.findOneAndUpdate({title:courseTitle},{length:length}).then(response=>{
+        //     console.log(response)
+        // })
+        Course.findOne({title:courseTitle}).then((course:ICourseModel)=>{
+            course.length=length;
+            course.save();
+        })
     }
 
 
@@ -87,6 +97,7 @@ class CoursesRoute {
         this.router.get('/:slug', this.GetCourse);
         this.router.post('/', this.PostCourse);
         this.router.delete('/:slug', this.DeleteCourse);
+        this.router.put('/',this.UpdateCourse);
     }
 }
 

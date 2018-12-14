@@ -1,6 +1,9 @@
-import { Schema,model } from 'mongoose';
+import { Schema,model, Document,Model  } from 'mongoose';
+import { ICourse} from './Interface/ICourse';
 
+export interface ICourseModel extends ICourse,Document{
 
+}
 
 let CourseSchema:Schema = new Schema({
     createdAt:Date,
@@ -41,4 +44,5 @@ let CourseSchema:Schema = new Schema({
 
 })
 
-export default model('Course',CourseSchema)
+export const Course:Model<ICourseModel>= model<ICourseModel>('Course',CourseSchema)
+ //export default model('Course',CourseSchema)

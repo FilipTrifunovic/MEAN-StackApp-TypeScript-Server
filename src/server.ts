@@ -50,7 +50,7 @@ class Server {
     }
 
     public server() {
-        mongoose.connect('mongodb+srv://filip:ToUt1IkGo6MOf6Ev@nodejs-yhbtj.mongodb.net/test?retryWrites=true',{useNewUrlParser:true,useCreateIndex:true})
+        mongoose.connect('mongodb+srv://filip:ToUt1IkGo6MOf6Ev@nodejs-yhbtj.mongodb.net/NodeJs?retryWrites=true',{useNewUrlParser:true,useCreateIndex:true})
         .then(result=>{
             console.log(`Connected to MongoDb`);
             this.app.listen(4000, (err) => {
