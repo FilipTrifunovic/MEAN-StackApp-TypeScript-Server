@@ -10,7 +10,7 @@ export class FaqRoute{
         this.routes();
     }
 
-    public GetFaq(req:Request,res:Response):void{
+    public getFaq(req:Request,res:Response):void{
         Faq.find()
             .then((data)=>{
                 console.log(`Data ${data}`);
@@ -28,7 +28,7 @@ export class FaqRoute{
     }
 
     routes(){
-        this.router.get(`/`,this.GetFaq)
+        this.router.get(`/`,this.getFaq)
     }
 }
 

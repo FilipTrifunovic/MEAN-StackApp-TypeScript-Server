@@ -4,17 +4,32 @@ import cors from 'cors';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 
+//Importi za rad sa sesijon
+import session from 'express-session';
+import connectMongo  from 'connect-mongodb-session';
+let MongoDBStore = connectMongo(session)
+import csrf from 'csurf';
+
 //Local imports
 import homeRoutes from './router/homePageRoute'
 import productRouter from './router/productRouter';
 import courseRouter from './router/coursesRoute';
 import faqRouter from './router/faqRoute';
+import  isAuth  from './middleware/authenticate';
 //import MongoDb from './utils/database';
 
 //Server
 class Server {
 
+    MONGODB_URI=`mongodb+srv://filip:ToUt1IkGo6MOf6Ev@nodejs-yhbtj.mongodb.net/NodeJs?retryWrites=true`;
     app: express.Application;
+    store=new MongoDBStore({
+        uri:this.MONGODB_URI,
+        collection:'sessions',
+       // expires:60
+    });
+    
+    csrfProtection = csrf();
 
     constructor() {
         this.app = express();
@@ -29,8 +44,14 @@ class Server {
         this.app.use(bodyParser.json());
         this.app.use(cors({ origin: 'http://localhost:4200' }));
         this.app.use(morgan('dev'));
-        this.app.use((req, res, next) => {
-            console.log(`Middleware`);
+        
+        //Session middleware
+        // opcije dodatne za session  cookie:{maxAge,expires}
+        this.app.use(session({secret:'my secret',resave:false, saveUninitialized:false,store:this.store}));
+        this.app.use(this.csrfProtection);
+        this.app.use((req,res,next)=>{
+            res.locals.isAuthenticated=req.session.isLoggedIn;
+            res.locals.csrfToekn=req.csrfToken();
             next();
         })
     }
@@ -47,10 +68,11 @@ class Server {
         this.app.use('', (req, res) => {
             res.status(404).send({ data: 'No Items found' })
         })
+
     }
 
     public server() {
-        mongoose.connect('mongodb+srv://filip:ToUt1IkGo6MOf6Ev@nodejs-yhbtj.mongodb.net/NodeJs?retryWrites=true',{useNewUrlParser:true,useCreateIndex:true})
+        mongoose.connect(this.MONGODB_URI,{useNewUrlParser:true,useCreateIndex:true})
         .then(result=>{
             console.log(`Connected to MongoDb`);
             this.app.listen(4000, (err) => {
@@ -60,7 +82,6 @@ class Server {
         })
         .catch(err=>console.log(err))
     }
-
 
 }
 

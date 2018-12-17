@@ -13,24 +13,22 @@ class CoursesRoute {
 
     }
 
-    public GetCourses(req: Request, res: Response): void {
+    public getCourses(req: Request, res: Response): void {
         Course.find({})
         .select('title description -_id')
             .then((data) => {
-                res.status(200).send({
-                    data
-                })
+                res.setHeader('Set-Cookie',`test=true; Max-Age=15`);
+                res.status(200).send({data})
             })
             .catch((err) => {
                 res.status(404).send({
-                    err:Error,
-                    status
+                    err:Error
                 })
                 console.log(err);
             })
     }
 
-    public GetCourse(req: Request, res: Response): void {
+    public getCourse(req: Request, res: Response): void {
         var slug: String = req.params.slug;
         console.log(`Course Title:`+slug);
         if (slug) {
@@ -48,7 +46,7 @@ class CoursesRoute {
         }
     }
 
-    public PostCourse(req: Request, res: Response): void {
+    public postCourse(req: Request, res: Response): void {
         console.log(req.body.title);
         let course = new Course({
             updated: new Date().getTime(),
@@ -68,7 +66,7 @@ class CoursesRoute {
         })
     }
 
-    public DeleteCourse(req: Request, res: Response): void {
+    public deleteCourse(req: Request, res: Response): void {
         let title: String = req.params.title;
         if (title) {
             Course.findOneAndRemove({
@@ -80,7 +78,7 @@ class CoursesRoute {
         }
     }
 
-    public UpdateCourse(req:Request,res:Response):void{
+    public updateCourse(req:Request,res:Response):void{
         const courseTitle=req.body.title
         const length=req.body.length;
         // Course.findOneAndUpdate({title:courseTitle},{length:length}).then(response=>{
@@ -97,11 +95,11 @@ class CoursesRoute {
 
 
     routes() {
-        this.router.get('/', this.GetCourses);
-        this.router.get('/:slug', this.GetCourse);
-        this.router.post('/', this.PostCourse);
-        this.router.delete('/:slug', this.DeleteCourse);
-        this.router.put('/',this.UpdateCourse);
+        this.router.get('/', this.getCourses);
+        this.router.get('/:slug', this.getCourse);
+        this.router.post('/', this.postCourse);
+        this.router.delete('/:slug', this.deleteCourse);
+        this.router.put('/',this.updateCourse);
     }
 }
 
@@ -109,3 +107,7 @@ const productRoutes = new CoursesRoute();
 productRoutes.routes();
 
 export default productRoutes.router;
+
+// Cookie se poedasava res.setHeader('Set-Cookie',`test=true; Max-Age=15; Secure; HttpOnly`); mozemo postavidi neke opcije kao na primer koliko sekundi traje cookie sa Max-Age 
+// Secure znaci da se cookie salje samo sa https requestovima
+// HttpOnly znaci da cient side javascript ne moze da pristupi cookie-u ne moze client side js da procita cookie

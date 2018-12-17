@@ -1,7 +1,10 @@
-// import User from "../models/User";
+function isAuth (req,res,next){
+    if(!res.session){
+        return res.send({
+            message:`Not Loggeed In`
+        })
+    }
+    next();
+}
 
-
-// const authenticate = (req,res,next)=>{
-//     const token = req.header('x-auth');
-    
-// }
+export default isAuth;

@@ -10,7 +10,7 @@ class HomePageRouter{
     }
 
 
-    public HomePage(req:Request,res:Response){
+    public homePage(req:Request,res:Response){
         return res.render('index')
     }
 

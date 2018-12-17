@@ -1,8 +1,12 @@
-
-import  mongoose from 'mongoose';
+import  { Model, Schema, model ,Document} from 'mongoose';
 import validator from 'validator';
+import { IUser } from './Interface/IUser';
 
-let UserSchema:mongoose.Schema = new mongoose.Schema({
+export interface IUserModel extends IUser,Document{
+
+}
+
+let UserSchema:Schema = new Schema({
     createdAt:Date,
     updatedAt:Date,
     name:{
@@ -41,4 +45,4 @@ let UserSchema:mongoose.Schema = new mongoose.Schema({
 
 UserSchema.methods
 
-export default mongoose.model('User',UserSchema)
+export const User:Model<IUserModel>=model<IUserModel>('User',UserSchema);

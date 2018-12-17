@@ -12,7 +12,7 @@ class ProductRouter {
 
     }
 
-    public GetProducts(req: Request, res: Response): void {
+    public getProducts(req: Request, res: Response): void {
         Product.find({})
             .then((data) => {
                 res.status(200).send({
@@ -27,7 +27,7 @@ class ProductRouter {
             })
     }
 
-    public GetProduct(req: Request, res: Response): void {
+    public getProduct(req: Request, res: Response): void {
         var title: String = req.params.title;
         if (title) {
             Product.findOne({
@@ -43,7 +43,7 @@ class ProductRouter {
         }
     }
 
-    public PostProduct(req: Request, res: Response): void {
+    public postProduct(req: Request, res: Response): void {
         let product = new Product({
             createdAt: new Date().getTime(),
             title: req.body.title,
@@ -60,7 +60,7 @@ class ProductRouter {
         })
     }
 
-    public DeleteProduct(req: Request, res: Response): void {
+    public deleteProduct(req: Request, res: Response): void {
         let title: String = req.params.title;
         if (title) {
             Product.findOneAndRemove({
@@ -72,16 +72,16 @@ class ProductRouter {
         }
     }
 
-    public UpdateProduct(req: Request, res: Response): void {
+    public updateProduct(req: Request, res: Response): void {
 
     }
 
 
     routes() {
-        this.router.get('/', this.GetProducts);
-        this.router.get('/:title', this.GetProduct);
-        this.router.post('/', this.PostProduct);
-        this.router.delete('/:title', this.DeleteProduct);
+        this.router.get('/', this.getProducts);
+        this.router.get('/:title', this.getProduct);
+        this.router.post('/', this.postProduct);
+        this.router.delete('/:title', this.deleteProduct);
     }
 }
 
