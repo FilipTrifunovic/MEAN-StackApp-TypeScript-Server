@@ -74,7 +74,7 @@ class AuthRoutes {
         User.findOne({ email: email })
             .then(user => {
                 if (user) {
-                   // return res.redirect('/signup');
+                   res.send({message:`Email already exist pick a different one`});
                 }
                 return bcryptjs.hash(password, 12)
                     .then(hashedPassword => {
@@ -151,11 +151,27 @@ class AuthRoutes {
                                     .isEmail()
                                     .withMessage('Please Enter a Valid Email')
                                     .custom((value,{req})=>{
-                                        if(value==='test@test.com')
-                                        throw new Error(`This Email Address if Frobiden`)
+                                        // if(value==='test@test.com'){
+                                        //     throw new Error(`This Email Address if Frobiden`)
+                                        // }
+                                        // return true;
+                                        // return User.findOne({email:value})
+                                        // .then(userDoc=>{
+                                        //     if(userDoc){
+                                        //         return  Promise.reject(`Email addres already exists`)
+                                                
+                                        //     }
+                                        //     return true;
+                                        // })
                                     }),
                                     body('password',`Email must at least 5 characters`)
-                                    .isLength({min:5}) ],this.postRegister);
+                                    .isLength({min:5}),
+                                    body('confirmPassword').custom((value,{req})=>{
+                                        if(value!==req.body.password){
+                                            throw new Error(`Passwords have to match`);
+                                        }
+                                        return true;
+                                    }) ],this.postRegister);
 
     }
 }
