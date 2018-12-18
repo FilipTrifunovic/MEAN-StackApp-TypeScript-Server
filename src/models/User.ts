@@ -12,7 +12,7 @@ let UserSchema:Schema = new Schema({
     name:{
         type:String,
         default:'',
-        required:true,
+        required:false,
         unique:true
     },
     email:{
@@ -20,7 +20,7 @@ let UserSchema:Schema = new Schema({
         required: true,
         trim: true,
         minLength:1,
-        unique:true,
+        //unique:true,
         validate:{
             validator:validator.isEmail,
             message:'{VALUE} email is not a valid email'
@@ -29,16 +29,18 @@ let UserSchema:Schema = new Schema({
     password:{
         type:String,
         required:true,
-        minlength:6
+        //minlength:6
     },
+    resetToken:String,
+    resetTokenExpiration:Date,
     tokens:[{
         acces:{
             type:String,
-            required:true
+            required:false
         },
         token:{
             type:String,
-            required:true
+            required:false
         }
     }]
 })

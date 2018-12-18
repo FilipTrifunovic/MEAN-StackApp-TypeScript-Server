@@ -14,6 +14,8 @@ class CoursesRoute {
     }
 
     public getCourses(req: Request, res: Response): void {
+        var time = new Date();
+        console.log(time.setDate(time.getDate()+1));
         Course.find({})
         .select('title description -_id')
             .then((data) => {

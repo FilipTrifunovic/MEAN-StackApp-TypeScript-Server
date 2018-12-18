@@ -15,6 +15,7 @@ import homeRoutes from './router/homePageRoute'
 import productRouter from './router/productRouter';
 import courseRouter from './router/coursesRoute';
 import faqRouter from './router/faqRoute';
+import authRouter from './router/authRoute';
 import  isAuth  from './middleware/authenticate';
 //import MongoDb from './utils/database';
 
@@ -47,13 +48,13 @@ class Server {
         
         //Session middleware
         // opcije dodatne za session  cookie:{maxAge,expires}
-        this.app.use(session({secret:'my secret',resave:false, saveUninitialized:false,store:this.store}));
-        this.app.use(this.csrfProtection);
-        this.app.use((req,res,next)=>{
-            res.locals.isAuthenticated=req.session.isLoggedIn;
-            res.locals.csrfToekn=req.csrfToken();
-            next();
-        })
+        // this.app.use(session({secret:'my secret',resave:false, saveUninitialized:false,store:this.store}));
+        // this.app.use(this.csrfProtection);
+        // this.app.use((req,res,next)=>{
+        //     res.locals.isAuthenticated=req.session.isLoggedIn;
+        //     res.locals.csrfToekn=req.csrfToken();
+        //     next();
+        // })
     }
 
     public routes(): void {
@@ -61,6 +62,7 @@ class Server {
         router = express.Router();
 
         this.app.use('/', router);
+        this.app.use('/api/auth',authRouter)
         this.app.use('/api/products', productRouter);
         this.app.use('/api/home', homeRoutes)
         this.app.use('/api/courses/', courseRouter)
