@@ -16,6 +16,7 @@ class AuthRoutes {
         this.routes(); 
     }
 
+    //Login User
     public postLogin(req:Request,res:Response,next:NextFunction){
        const email = req.body.email;
        const password=req.body.password;
@@ -42,7 +43,7 @@ class AuthRoutes {
                })
                .catch(err=>{
                    console.log(err);
-                   res.send({
+                   res.status(422).send({
                        message:`password incorect`
                    })
                })
@@ -57,11 +58,12 @@ class AuthRoutes {
         });
     }
 
-
+    //Register User 
     public postRegister(req: Request, res: Response) {
         const email = req.body.email;
         console.log(`Email ${email}`);
         const password = req.body.password;
+        console.log(password)
         const confirmPassword = req.body.confirmPassword;
         const errors=validationResult(req);
         console.log(errors)
@@ -69,14 +71,9 @@ class AuthRoutes {
             return res.status(422).send({
                 Message:`Invalid input`,
                 errorMessage:errors.array()[0]['msg']
-            })
-        }
-        User.findOne({ email: email })
-            .then(user => {
-                if (user) {
-                   res.send({message:`Email already exist pick a different one`});
-                }
-                return bcryptjs.hash(password, 12)
+                })
+            } 
+                 bcryptjs.hash(password, 12)
                     .then(hashedPassword => {
                         const userToSignup = new User({
                             email: email,
@@ -89,14 +86,35 @@ class AuthRoutes {
                             result,
                             message:'UserRegistered'
                         })
+                    }).catch(err => {
+                            res.status(404).send({
+                            message:`Error while registering`,
+                            error:err
                     })
-            }).catch(err => {
-                res.status(404).send({
-                    message:`Error whilre registering`,
-                    error:err
-                })
-                console.log(err)})
+               })
     }
+
+
+    public getCheckEmailNotTaken(req:Request,res:Response){
+        const email = req.query.email;
+        console.log(email);
+        if(email){
+            User.findOne({email:email}).then(user=>{
+                if(user){
+                     res.send({
+                        emailTakend:true,
+                        message:'Email addres already exists'
+                    })
+                }else {
+                    res.send({
+                        emailTakend:false,
+                        message:'Valid Email'
+                    })
+                }
+            }).catch(err=>console.log(err))
+        }
+    }
+
 
 
     public getLogin(req: Request, res: Response){
@@ -116,6 +134,7 @@ class AuthRoutes {
         });
     }
 
+    //Reset Password
     public postResetPassword(req: Request, res: Response){
          crypto.randomBytes(32,(err,buffer)=>{
              if(err){
@@ -144,9 +163,16 @@ class AuthRoutes {
     }
 
     routes(){
-        this.router.get('/',this.getLogin)
-        this.router.post('/',this.postLogin);
-        this.router.post('/logout',this.postLogout);  
+        this.router.post('/login',[body('email')
+                                    .isEmail()
+                                    .withMessage('Please Enter a valid Email')
+                                    .normalizeEmail(),
+                                    body('password','Password has to be valid')
+                                    .trim()],this.postLogin);
+        this.router.post('/logout',this.postLogout);
+        this.router.get('/checkEmailTaken',this.getCheckEmailNotTaken);  
+
+        //Route with custom validators;
         this.router.post('/register',[check('email')
                                     .isEmail()
                                     .withMessage('Please Enter a Valid Email')
@@ -155,23 +181,27 @@ class AuthRoutes {
                                         //     throw new Error(`This Email Address if Frobiden`)
                                         // }
                                         // return true;
-                                        // return User.findOne({email:value})
-                                        // .then(userDoc=>{
-                                        //     if(userDoc){
-                                        //         return  Promise.reject(`Email addres already exists`)
+                                        return User.findOne({email:value})
+                                        .then(userDoc=>{
+                                            if(userDoc){
+                                                console.log(`Email exists`);
+                                                return  Promise.reject(`Email addres already exists`)
                                                 
-                                        //     }
-                                        //     return true;
-                                        // })
-                                    }),
-                                    body('password',`Email must at least 5 characters`)
-                                    .isLength({min:5}),
-                                    body('confirmPassword').custom((value,{req})=>{
-                                        if(value!==req.body.password){
-                                            throw new Error(`Passwords have to match`);
-                                        }
-                                        return true;
-                                    }) ],this.postRegister);
+                                            }
+                                            return Promise.resolve(true);
+                                        })
+                                    }).normalizeEmail(),
+                                    body('password',`Password must at least 5 characters`)
+                                    .isLength({min:5})
+                                    .trim()
+                                    // body('confirmPassword').trim().custom((value,{req})=>{
+                                    //     if(value!==req.body.password){
+                                    //         throw new Error(`Passwords have to match`);
+                                    //     }
+                                    //     return true;
+                                    // }) 
+                                ],
+                                    this.postRegister);
 
     }
 }

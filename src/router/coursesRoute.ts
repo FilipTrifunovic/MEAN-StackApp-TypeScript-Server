@@ -1,6 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import {Course, ICourseModel} from "../models/Course";
 
+import { check,validationResult,body } from'express-validator/check';
+
+//import { Types } from 'mongoose';
 
 
 class CoursesRoute {
@@ -48,7 +51,7 @@ class CoursesRoute {
         }
     }
 
-    public postCourse(req: Request, res: Response): void {
+    public postCourse(req: Request, res: Response) {
         console.log(req.body.title);
         let course = new Course({
             updated: new Date().getTime(),
@@ -58,17 +61,27 @@ class CoursesRoute {
             category: req.body.category,
             length:req.body.length,
             totalSteps:req.body.totalSteps,
-            steps:req.body.steps
+            steps:req.body.steps,
+            // Storovanje mongoose ID-a
+            // _id: new Types.ObjectId(req.body.id)
         })
+        const errors=validationResult(req);
 
-        course.save().then((doc) => {
-            res.status(200).send(doc);
-        }, (err) => {
-            res.status(400).send(err);
-        })
+        if(!errors.isEmpty()){
+           return res.send({
+                errorMessage:errors.array()['msg'],
+                error:`Error Invalid Inputs`
+            })
+        }
+            course.save().then((doc) => {
+                res.status(200).send(doc);
+            }, (err) => {
+                res.status(400).send(err);
+            })
+        
     }
 
-    public deleteCourse(req: Request, res: Response): void {
+    public deleteCourse(req: Request, res: Response) {
         let title: String = req.params.title;
         if (title) {
             Course.findOneAndRemove({
@@ -99,7 +112,16 @@ class CoursesRoute {
     routes() {
         this.router.get('/', this.getCourses);
         this.router.get('/:slug', this.getCourse);
-        this.router.post('/', this.postCourse);
+        this.router.post('/',[
+            body('title')
+                .isAlphanumeric()
+                .isLength({min:5})
+                .trim(),
+            body('description')
+                //.isURL()
+                .isLength({min:5})
+                .trim()],
+                 this.postCourse);
         this.router.delete('/:slug', this.deleteCourse);
         this.router.put('/',this.updateCourse);
     }

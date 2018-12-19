@@ -13,7 +13,7 @@ let UserSchema:Schema = new Schema({
         type:String,
         default:'',
         required:false,
-        unique:true
+        //unique:true
     },
     email:{
         type: String,
@@ -33,16 +33,16 @@ let UserSchema:Schema = new Schema({
     },
     resetToken:String,
     resetTokenExpiration:Date,
-    tokens:[{
-        acces:{
-            type:String,
-            required:false
-        },
-        token:{
-            type:String,
-            required:false
-        }
-    }]
+    // tokens:[{
+    //     acces:{
+    //         type:String,
+    //         required:false
+    //     },
+    //     token:{
+    //         type:String,
+    //         required:false
+    //     }
+    // }]
 })
 
 UserSchema.methods
