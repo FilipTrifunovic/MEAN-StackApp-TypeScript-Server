@@ -16,24 +16,27 @@ class CoursesRoute {
 
     }
 
-    public getCourses(req: Request, res: Response): void {
+    public getCourses(req: Request, res: Response,next:NextFunction): void {
         var time = new Date();
+        
         console.log(time.setDate(time.getDate()+1));
         Course.find({})
         .select('title description -_id')
             .then((data) => {
                 res.setHeader('Set-Cookie',`test=true; Max-Age=15`);
                 res.status(200).send({data})
+                const error = new Error(`Error Object Message`);
+                error['status']=300;
+                console.log(error['status']);
             })
             .catch((err) => {
-                res.status(404).send({
-                    err:Error
-                })
-                console.log(err);
+                const error = new Error(`406 eror message`);
+                error['status']=406;
+                return next(error);
             })
     }
 
-    public getCourse(req: Request, res: Response): void {
+    public getCourse(req: Request, res: Response,next:NextFunction): void {
         var slug: String = req.params.slug;
         console.log(`Course Title:`+slug);
         if (slug) {
@@ -46,12 +49,14 @@ class CoursesRoute {
                 }
                 res.send(object);
             }).catch((err) => {
-                res.status(400).send(err);
+                const error = new Error(`406 eror message`);
+                error['status']=400;
+                return next(error);
             })
         }
     }
 
-    public postCourse(req: Request, res: Response) {
+    public postCourse(req: Request, res: Response,next:NextFunction) {
         console.log(req.body.title);
         let course = new Course({
             updated: new Date().getTime(),
@@ -74,9 +79,11 @@ class CoursesRoute {
             })
         }
             course.save().then((doc) => {
-                res.status(200).send(doc);
-            }, (err) => {
-                res.status(400).send(err);
+                res.status(201).send(doc);
+            }).catch(err=>{
+                const error = new Error(err);
+                error['status']=400;
+                return next(error);
             })
         
     }
@@ -88,12 +95,15 @@ class CoursesRoute {
                 title: title
             }).then((doc) => {
                 if (!doc) return res.status(404).send();
-                res.send({ doc });
+                res.status(200).send({ doc });
             })
         }
     }
 
-    public updateCourse(req:Request,res:Response):void{
+    public updateCourse(req:Request,res:Response,next:NextFunction):void{
+        // Ako throwujemo gresku u sinhronom delu koda vam promisa express ce detektovati gresku i proslediti error middleware-u 
+        // U asinhronom kodu moramo da koristimo next(error) kako bi dosli do error handling middleware-a
+        // throw new Error()
         const courseTitle=req.body.title
         const length=req.body.length;
         // Course.findOneAndUpdate({title:courseTitle},{length:length}).then(response=>{
@@ -105,7 +115,11 @@ class CoursesRoute {
         }).then(result=>{
             console.log(`Course Updated`);
             res.status(200).send(`Course Updated`)
-        }).catch(err=>{console.log(err)})
+        }).catch(err=>{
+            const error = new Error(`404 eror message`);
+                error['status']=404;
+                return next(error);
+        })
     }
 
 
