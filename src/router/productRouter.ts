@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Product from '../models/Product';
+import { Product } from '../models/Product';
 
 class ProductRouter {
 
@@ -43,13 +43,21 @@ class ProductRouter {
         }
     }
 
-    public postProduct(req: Request, res: Response): void {
+    public postProduct(req: Request, res: Response,next:NextFunction) {
+        const image = req.file;
+        console.log(image);
+        if(!image){
+           return res.status(422).send({
+               message:'Not good file',
+           })
+        }
+
         let product = new Product({
             createdAt: new Date().getTime(),
             title: req.body.title,
             subtitle: req.body.subtitle,
             price: req.body.price,
-            image: req.body.image,
+            imageUrl: image.path,
             text: req.body.text
         })
 

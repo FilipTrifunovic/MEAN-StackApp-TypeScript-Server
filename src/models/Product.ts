@@ -1,6 +1,7 @@
-import { Schema,model } from 'mongoose';
+import { Schema,model, Document, Model } from 'mongoose';
+import { IProduct } from './Interface/IProduct';
 
-
+export interface IProductModel extends IProduct,Document{}
 
 let ProductSchema:Schema = new Schema({
     createdAt:Date,
@@ -20,7 +21,7 @@ let ProductSchema:Schema = new Schema({
         default:'',
         required:true
     },
-    image:{
+    imageUrl:{
         type:String,
         default:'',
         required:true
@@ -32,5 +33,6 @@ let ProductSchema:Schema = new Schema({
     }
 })
 
-export default model('Product',ProductSchema)
+export const Product:Model<IProductModel>=model<IProductModel>('Product',ProductSchema)
+//export default model('Product',ProductSchema)
 

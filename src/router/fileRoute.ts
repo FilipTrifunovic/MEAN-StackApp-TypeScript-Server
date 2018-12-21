@@ -1,10 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import path from 'path';
+import PDFDocument from 'pdfkit';
 
-import fs, { readlink } from 'fs';
+import fs from 'fs';
 import readLine from 'readline';
 import { observable,Observable,bindCallback } from 'rxjs';
-import { map } from 'rxjs/operators';
-import multer from 'multer';
+import { map, onErrorResumeNext } from 'rxjs/operators';
 
 
 export class FileRoute{
@@ -25,21 +26,32 @@ export class FileRoute{
         console.log(`lines`+lines);
     }
 
-    public getFile(req:Request,res:Response):void{
-      function readLines(){
-        res.send({message:`FileRouter`});
-        const lines = new Array<string>();
-        const rl = readLine.createInterface({input:fs.createReadStream('src/router/file.txt'),crlfDelay:Infinity});
-        rl.on('line',(line:string)=>{ lines.push(line); });
-        rl.on('close',()=>{this.processLinesCb(lines); })
-      }
-      
-      const readObservable = bindCallback(readLines);
+    public getFile(req:Request,res:Response,next:NextFunction):void{
+     const fileName=req.params.fileName
+     const filePath=path.join('src','data','files',fileName);
+    //  console.log(filePath);
+    // Preloadovanje Fileova moze se koristiti za manje fileove Bolje Streamovati Fileove
+    //  fs.readFile(filePath,(err,file)=>{
+    //     if(err){
+    //         const error=new Error(`Ne postoji File`);
+    //         error['status']=404;
+    //         return next(error);
+    //     }
+    //     res.setHeader('Content-Type','application/pdf');
+    //     res.setHeader('Concent-Disposition',`inline; filename=${fileName}`);
+    //     res.status(200).send(file);
+    //  })
+
+        const file=fs.createReadStream(filePath);
+        res.setHeader('Content-Type','application/pdf');
+        res.setHeader('Concent-Disposition',`inline; filename=${fileName}`);
+        file.pipe(res);
 
     }
 
     public postUploadFile(req:Request,res:Response){
         const file =req.file;
+        console.log(file);
         if(!file){
             return res.status(422).send({
                 message:'Invalid input file' 
@@ -47,11 +59,22 @@ export class FileRoute{
         }
         const fileUrl= file.path; 
         res.send({message:`File Uplad`});
-        console.log(file);
+    }
+
+    public getPdfDocument(req:Request,res:Response){
+        const pdfDoc=new PDFDocument();
+        res.setHeader('Content-Type','application/pdf');
+        res.setHeader('Concent-Disposition',`inline; filename=${req.body.fileName}`);
+        const filePath=path.join('src','data','files',req.body.fileName);
+        pdfDoc.pipe(fs.createWriteStream(filePath));
+        pdfDoc.pipe(res);
+
+        pdfDoc.text('Hello World');
+        pdfDoc.end();
     }
 
     routes(){
-        this.router.get(`/`,this.getFile);
+        this.router.get(`/:fileName`,this.getFile);
         this.router.post('/uploadFile',this.postUploadFile);
         
     }

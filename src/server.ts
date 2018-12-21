@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import path from 'path';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -37,7 +38,7 @@ class Server {
         },
         filename:(req,file,callback)=>{
             console.log(file.filename);
-           callback(null,2 +'-'+ file.originalname) 
+           callback(null,new Date().getTime() +'-'+ file.originalname) 
         }
     });
 
@@ -64,6 +65,7 @@ class Server {
         this.app.use(multer({storage:this.fileStorage,fileFilter:this.fileFilter}).single('file'));
         this.app.use(bodyParser.json());
         this.app.use(cors({ origin: 'http://localhost:4200' }));
+        this.app.use('/images',express.static(path.join(__dirname,'images')))
         this.app.use(morgan('dev'));
         
         //Session middleware
@@ -94,7 +96,10 @@ class Server {
 
         this.app.use((error,req:Request,res:Response,next:NextFunction)=>{
             console.log(`Express middleware error handler`);
-            res.send(error.message);
+            if(error.status){
+               return res.status(error.status).send(error.message);
+            }
+                res.send(error.message);
         })
 
     }
