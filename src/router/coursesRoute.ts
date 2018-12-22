@@ -20,7 +20,10 @@ class CoursesRoute {
         var time = new Date();
         
         console.log(time.setDate(time.getDate()+1));
-        Course.find({})
+        Course.find({}) 
+        // Paginacija skip preskace prvih n itema limit limitira broj itema koji vraca
+        // .skip((page-1)*ITEMS_PER_PAGE)
+        // .limit(ITEMS_PER_PAGE)
         .select('title description -_id')
             .then((data) => {
                 res.setHeader('Set-Cookie',`test=true; Max-Age=15`);

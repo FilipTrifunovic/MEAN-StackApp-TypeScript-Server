@@ -3,6 +3,7 @@ import path from 'path';
 import PDFDocument from 'pdfkit';
 
 import fs from 'fs';
+import { deleteFile } from '../utils/deleteFile';
 import readLine from 'readline';
 import { observable,Observable,bindCallback } from 'rxjs';
 import { map, onErrorResumeNext } from 'rxjs/operators';
@@ -28,7 +29,9 @@ export class FileRoute{
 
     public getFile(req:Request,res:Response,next:NextFunction):void{
      const fileName=req.params.fileName
-     const filePath=path.join('src','data','files',fileName);
+     console.log(`FILE`);
+     console.log(fileName);
+     const filePath=path.join('data','files',fileName);
     //  console.log(filePath);
     // Preloadovanje Fileova moze se koristiti za manje fileove Bolje Streamovati Fileove
     //  fs.readFile(filePath,(err,file)=>{
@@ -63,19 +66,35 @@ export class FileRoute{
 
     public getPdfDocument(req:Request,res:Response){
         const pdfDoc=new PDFDocument();
+        const filename= new Date().getTime() + "-"+"file.pdf";
+        const filePath=path.join('data','files',filename);
         res.setHeader('Content-Type','application/pdf');
-        res.setHeader('Concent-Disposition',`inline; filename=${req.body.fileName}`);
-        const filePath=path.join('src','data','files',req.body.fileName);
-        pdfDoc.pipe(fs.createWriteStream(filePath));
+        res.setHeader('Content-Disposition',`inline; filename=${filename}`);
+        const pdf=pdfDoc.pipe(fs.createWriteStream(filePath));
         pdfDoc.pipe(res);
-
-        pdfDoc.text('Hello World');
+        pdfDoc.fontSize(26).text(`Test PDF`,{
+            underline:true
+        });
         pdfDoc.end();
     }
 
+    public deleteFile(req:Request,res:Response){
+        const filePath=path.join('data','files','1545406384375-FinViz.txt');
+        deleteFile(filePath).then(message=>{
+            res.status(200).send({
+                message:`File ${filePath} deleted`
+            })
+        }).catch(err=>{
+            res.status(502).send({err})
+        })
+        
+    }
+
     routes(){
-        this.router.get(`/:fileName`,this.getFile);
+        this.router.get('/getPdf',this.getPdfDocument);
         this.router.post('/uploadFile',this.postUploadFile);
+        this.router.get(`/getFile/:fileName`,this.getFile);
+        this.router.delete('/deleteFile',this.deleteFile);
         
     }
 
@@ -85,3 +104,6 @@ const fileRoutes = new FileRoute();
 fileRoutes.routes();
 
 export default fileRoutes.router;
+
+// izvlacimo query parametre iz url-a
+// req.query.email  link?email=***

@@ -95,7 +95,7 @@ class Server {
         })
 
         this.app.use((error,req:Request,res:Response,next:NextFunction)=>{
-            console.log(`Express middleware error handler`);
+            console.log(error);
             if(error.status){
                return res.status(error.status).send(error.message);
             }
