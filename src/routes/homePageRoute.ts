@@ -11,7 +11,7 @@ class HomePageRouter{
 
 
     public homePage(req:Request,res:Response){
-        return res.render('index')
+       res.send(200).json({message:`Home Page Data`})
     }
 
 

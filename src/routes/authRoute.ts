@@ -5,6 +5,7 @@ import { check,validationResult,body } from'express-validator/check';
 
 import { User, IUserModel } from '../models/User';
 import MailService from '../utils/mail';
+import { checkEmailNotTaken, login } from "../controllers/authController";
 
 class AuthRoutes {
     
@@ -17,39 +18,39 @@ class AuthRoutes {
     }
 
     //Login User
-    public postLogin(req:Request,res:Response,next:NextFunction){
-       const email = req.body.email;
-       const password=req.body.password;
-       User.findOne({email:email}).then(
-           user=>{
-               if(!user){
-                   return res.status(504).send({
-                       message:`Whrond user Name`
-                   })
-               }
-               bcryptjs.compare(password,user.password)
-               .then(result=>{
-                   if(result){
-                       req.session.isLoggedIn=true;
-                       req.session.user=user;
-                   return req.session.save(err=>{
-                        console.log(err);
-                        return res.send({
-                            message:`password corect`
-                        }) 
-                    })
-                   }
-                    res.send({message:`Password Correct User logged in`})
-               })
-               .catch(err=>{
-                   console.log(err);
-                   res.status(422).send({
-                       message:`password incorect`
-                   })
-               })
-           }
-       )
-    }
+    // public postLogin(req:Request,res:Response,next:NextFunction){
+    //    const email = req.body.email;
+    //    const password=req.body.password;
+    //    User.findOne({email:email}).then(
+    //        user=>{
+    //            if(!user){
+    //                return res.status(504).send({
+    //                    message:`Whrond user Name`
+    //                })
+    //            }
+    //            bcryptjs.compare(password,user.password)
+    //            .then(result=>{
+    //                if(result){
+    //                    req.session.isLoggedIn=true;
+    //                    req.session.user=user;
+    //                return req.session.save(err=>{
+    //                     console.log(err);
+    //                     return res.send({
+    //                         message:`password corect`
+    //                     }) 
+    //                 })
+    //                }
+    //                 res.send({message:`Password Correct User logged in`})
+    //            })
+    //            .catch(err=>{
+    //                console.log(err);
+    //                res.status(422).send({
+    //                    message:`password incorect`
+    //                })
+    //            })
+    //        }
+    //    )
+    // }
 
     public postLogout(req:Request,res:Response){
         req.session.destroy((err)=>{
@@ -95,25 +96,7 @@ class AuthRoutes {
     }
 
 
-    public getCheckEmailNotTaken(req:Request,res:Response){
-        const email = req.query.email;
-        console.log(email);
-        if(email){
-            User.findOne({email:email}).then(user=>{
-                if(user){
-                     res.send({
-                        emailTakend:true,
-                        message:'Email addres already exists'
-                    })
-                }else {
-                    res.send({
-                        emailTakend:false,
-                        message:'Valid Email'
-                    })
-                }
-            }).catch(err=>console.log(err))
-        }
-    }
+
 
 
 
@@ -168,9 +151,9 @@ class AuthRoutes {
                                     .withMessage('Please Enter a valid Email')
                                     .normalizeEmail(),
                                     body('password','Password has to be valid')
-                                    .trim()],this.postLogin);
+                                    .trim()],login);
         this.router.post('/logout',this.postLogout);
-        this.router.get('/checkEmailTaken',this.getCheckEmailNotTaken);  
+        this.router.get('/checkEmailTaken',checkEmailNotTaken);  
 
         //Route with custom validators;
         this.router.post('/register',[check('email')

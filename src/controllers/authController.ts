@@ -55,10 +55,7 @@ export function login(req:Request,res:Response,next:NextFunction){
                 //error['data']=errors;
                 throw error;
             }
-            const token = jwt.sign({email:loadedUser.email,
-                                    userId:loadedUser._id.toString()},
-                                    'secret',
-                                    { expiresIn:'1h'});
+            const token = generateJWT(loadedUser.email,loadedUser._id)
             res.status(200).json({token:token,userId:loadedUser._id.toString()})
         })
         .catch(err=>{
@@ -67,4 +64,32 @@ export function login(req:Request,res:Response,next:NextFunction){
             }
             next(err);
         })
+}
+
+export function checkEmailNotTaken(req:Request,res:Response){
+    const email = req.query.email;
+    console.log(email);
+    if(email){
+        User.findOne({email:email}).then(user=>{
+            if(user){
+                 res.send({
+                    emailTakend:true,
+                    message:'Email addres already exists'
+                })
+            }else {
+                res.send({
+                    emailTakend:false,
+                    message:'Valid Email'
+                })
+            }
+        }).catch(err=>console.log(err))
+    }
+}
+
+function generateJWT(email:string,userId:any){
+    const token = jwt.sign({email:email,
+        userId:userId.toString()},
+        'secret',
+        { expiresIn:'1h'})
+        return token;
 }
