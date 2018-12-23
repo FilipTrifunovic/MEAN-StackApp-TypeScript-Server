@@ -13,13 +13,12 @@ let MongoDBStore = connectMongo(session)
 import csrf from 'csurf';
 
 //Local imports
-import homeRoutes from './router/homePageRoute'
-import productRouter from './router/productRouter';
-import courseRouter from './router/coursesRoute';
-import faqRouter from './router/faqRoute';
-import authRouter from './router/authRoute';
-import fileRouter from './router/fileRoute';
-import  isAuth  from './middleware/authenticate';
+import homeRoutes from './routes/homePageRoute'
+import productRouter from './routes/productRouter';
+import courseRouter from './routes/coursesRoute';
+import faqRouter from './routes/faqRoute';
+import authRouter from './routes/authRoute';
+import fileRouter from './routes/fileRoute';
 //import MongoDb from './utils/database';
 
 //Server
@@ -64,10 +63,16 @@ class Server {
         this.app.use(bodyParser.urlencoded({ extended: false }));
         this.app.use(multer({storage:this.fileStorage,fileFilter:this.fileFilter}).single('file'));
         this.app.use(bodyParser.json());
-        this.app.use(cors({ origin: 'http://localhost:4200' }));
+       // this.app.use(cors({ origin: 'http://localhost:4200' }));
         this.app.use('/images',express.static(path.join(__dirname,'images')))
         this.app.use(morgan('dev'));
         
+        this.app.use((req,res,next)=>{ 
+            res.setHeader('Access-Control-Allow-Origin','*');
+            res.setHeader('Access-Control-Allow-Methods','GET, POST, PUT, PATCH, DELETE');
+            res.setHeader('Access-Control-Allow-Headers','Content-type, Authorization');
+            next();
+         })
         //Session middleware
         // opcije dodatne za session  cookie:{maxAge,expires}
         // this.app.use(session({secret:'my secret',resave:false, saveUninitialized:false,store:this.store}));
@@ -94,12 +99,10 @@ class Server {
             res.status(404).send({ data: 'No Items found' })
         })
 
-        this.app.use((error,req:Request,res:Response,next:NextFunction)=>{
-            console.log(error);
-            if(error.status){
-               return res.status(error.status).send(error.message);
-            }
-                res.send(error.message);
+        this.app.use((error:any,req:Request,res:Response,next:NextFunction)=>{
+           const status = error.statusCode || 500;
+           const message = error.message;
+           res.status(status).json({message:message});
         })
 
     }

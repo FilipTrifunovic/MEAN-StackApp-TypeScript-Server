@@ -6,5 +6,6 @@ export interface ICourse{
     length:Number,
     totalsteps:Number,
     updated:Date,
-    steps:[String]
+    steps:[String],
+    creator:String
 }

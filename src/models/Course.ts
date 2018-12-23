@@ -9,7 +9,7 @@ export interface ICourseModel extends ICourse,Document{
 }
 
 let CourseSchema:Schema = new Schema({
-    createdAt:Date,
+    
     title:{
         type:String,
         default:'',
@@ -36,15 +36,16 @@ let CourseSchema:Schema = new Schema({
         default:0,
         required:true
     },
-    updated:{
-        type:Date,
-        required:true
-    },
     steps:{
         
         type:[String],
         required:true,
     },
+    creator:{
+        type:Schema.Types.ObjectId,
+        ref:'User',
+        required:true
+    }
     //embeded item
     // cart:{
     //     productId : {type:Schema.Types.ObjectId,
@@ -54,7 +55,7 @@ let CourseSchema:Schema = new Schema({
     //     quantity:    { type:Number,required:true}
     // }
 
-})
+},{timestamps:true})
 
 export const Course:Model<ICourseModel> = model<ICourseModel>('Course',CourseSchema)
  //export default model('Course',CourseSchema)

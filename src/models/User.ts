@@ -31,6 +31,14 @@ let UserSchema:Schema = new Schema({
         required:true,
         //minlength:6
     },
+    status :{
+        type:String,
+        default:'user'
+    },
+    courses:[{
+        type:Schema.Types.ObjectId,
+        ref:'Courses'
+    }],
     resetToken:String,
     resetTokenExpiration:Date,
     // tokens:[{
