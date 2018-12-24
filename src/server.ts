@@ -111,9 +111,13 @@ class Server {
         mongoose.connect(this.MONGODB_URI,{useNewUrlParser:true,useCreateIndex:true})
         .then(()=>{
             console.log(`Connected to MongoDb`);
-            this.app.listen(4000, (err) => {
+            const server = this.app.listen(4000, (err) => {
                 if (err) throw err;
                 console.log('App now listening for requests on port 4000');
+            })
+            const io = require('socket.io')(server);
+            io.on('connection',socket=>{
+                console.log(`Client Connected`);
             })
         })
         .catch(err=>{

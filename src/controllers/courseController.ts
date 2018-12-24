@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { Course, ICourseModel } from "../models/Course";
 import { validationResult } from "express-validator/check";
+import { startSession } from 'mongoose';
 
 import { Types } from 'mongoose';
 import { User } from "../models/User";
@@ -40,7 +41,7 @@ export function clearImage(fileUrl:string){
 
 export function getCourses(req: Request, res: Response,next:NextFunction): void {
     var time = new Date();
-    
+    console.log(`test 1`);
     console.log(time.setDate(time.getDate()+1));
     Course.find({}) 
     // Paginacija skip preskace prvih n itema limit limitira broj itema koji vraca
@@ -48,6 +49,7 @@ export function getCourses(req: Request, res: Response,next:NextFunction): void 
     // .limit(ITEMS_PER_PAGE)
     .select('title description -_id')
         .then((data) => {
+            console.log(`test 2`);
             res.setHeader('Set-Cookie',`test=true; Max-Age=15`);
             res.status(200).json({data});
         })
@@ -57,6 +59,7 @@ export function getCourses(req: Request, res: Response,next:NextFunction): void 
             }
             next(err);
         })
+        console.log(`test 3`);
 }
 
 export function getCourse(req: Request, res: Response,next:NextFunction): void {
@@ -80,8 +83,15 @@ export function getCourse(req: Request, res: Response,next:NextFunction): void {
     }
 }
 
-export function postCourse (req, res: Response,next:NextFunction) {
+export async function postCourse (req, res: Response,next:NextFunction) {
     console.log(req.body.title);
+    const errors=validationResult(req);
+    if(!errors.isEmpty()){
+       const error = new Error(`Validation Failed Entered Data is Incorect`);
+       error['statusCode']=422;
+       throw error;
+    }
+    
     let course = new Course({
         updated: new Date().getTime(),
         title: req.body.title,
@@ -95,13 +105,7 @@ export function postCourse (req, res: Response,next:NextFunction) {
         // Storovanje mongoose ID-a
         // _id: new Types.ObjectId(req.body.id)
     })
-    const errors=validationResult(req);
-
-    if(!errors.isEmpty()){
-       const error = new Error(`Validation Failed Entered Data is Incorect`);
-       error['statusCode']=422;
-       throw error;
-    }
+        
         course.save().then((doc):any => {
             return User.findById(req.userId)
         }).then(user=>{
@@ -117,7 +121,6 @@ export function postCourse (req, res: Response,next:NextFunction) {
             }
             next(err);
         })
-    
 }
 
 export function deleteCourse(req: Request, res: Response,next:NextFunction) {
@@ -206,4 +209,78 @@ export function getCoursesWithPagination(req:Request,res:Response,next:NextFunct
         }
         next(err);
     })
+}
+
+
+export async function getCourseAsync(req: Request, res: Response,next:NextFunction) {
+    var slug: string = req.params.slug;
+        try {
+            const course = await Course.findOne({slug: slug})
+            if(!course){
+                return res.status(404).json({message:'Course not found'});
+            }
+            res.status(200).json({course:course,message:`Course found`});
+        } catch (err) {
+            if(!err.statusCode){
+                err.statusCode=400;
+            }
+            next(err);
+            
+        }       
+}
+
+export async function getCoursesAsync(req: Request, res: Response,next:NextFunction) {
+    try {
+        const courses=await Course.find({})
+        if(!courses){
+            const error= new Error(`Courses not found `);
+            error['statusCode']=404;
+            throw error;
+        }
+        res.status(200).json({
+            message:`Courses:1`,
+            courses:courses,
+        })
+    } catch (err) {
+        if(!err.statusCode){
+            err.statusCode=500;
+        }
+        next(err);
+    }
+
+    // Paginacija skip preskace prvih n itema limit limitira broj itema koji vraca
+    // .skip((page-1)*ITEMS_PER_PAGE)
+    // .limit(ITEMS_PER_PAGE)
+    //.select('title description -_id')
+}
+
+
+
+export async function deleteWithAuthAsync(req:Request,res:Response,next:NextFunction){
+    const courseId:string=req.params.slug;
+    console.log(courseId);
+    try {
+        const course = await Course.findById(courseId);
+        console.log(course)
+        if(!course){
+            const error= new Error(`Course not found course`);
+            error['statusCode']=404;
+            throw error;
+        }
+        const result = await Course.findOneAndRemove(courseId);
+        if(!result){
+            const error= new Error(`Course not deleted`);
+            error['statusCode']=404;
+            throw error;
+        }
+        res.status(200).json({
+            message:`Course Deleted`,
+            result:result
+        })
+    } catch (err) {
+        if(!err.statusCode){
+            err.statusCode=500;
+        }
+        next(err);
+    }
 }

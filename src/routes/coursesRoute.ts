@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { validationResult,body } from'express-validator/check';
-import { getCourses, getCourse, deleteCourse, updateCourse, postCourse } from '../controllers/courseController';
+import { body } from'express-validator/check';
+import {  updateCourse, postCourse, getCourseAsync, getCoursesAsync, deleteWithAuthAsync } from '../controllers/courseController';
 
 import { isAuthenticated } from '../middleware/authenticate';
 //import { Types } from 'mongoose';
@@ -17,8 +17,8 @@ class CoursesRoute {
     }
 
     routes() {
-        this.router.get('/',isAuthenticated, getCourses);
-        this.router.get('/:slug', getCourse);
+        this.router.get('/', getCoursesAsync);
+        this.router.get('/:slug', getCourseAsync);
         this.router.post('/',[
             body('title')
                 .isAlphanumeric()
@@ -29,7 +29,7 @@ class CoursesRoute {
                 .isLength({min:5})
                 .trim()],
                  postCourse);
-        this.router.delete('/:slug', deleteCourse);
+        this.router.delete('/:slug', deleteWithAuthAsync);
         this.router.put('/',updateCourse);
     }
 }
