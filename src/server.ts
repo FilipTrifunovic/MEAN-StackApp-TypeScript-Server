@@ -12,6 +12,10 @@ import connectMongo  from 'connect-mongodb-session';
 let MongoDBStore = connectMongo(session)
 import csrf from 'csurf';
 
+//import az passport autentikaciju
+import googleStrategy from 'passport-google-oauth2';
+import { google } from 'googleapis';
+
 //Local imports
 import homeRoutes from './routes/homePageRoute'
 import productRouter from './routes/productRouter';
@@ -24,6 +28,7 @@ import fileRouter from './routes/fileRoute';
 //Server
 class Server {
 
+   
     MONGODB_URI=`mongodb+srv://filip:ToUt1IkGo6MOf6Ev@nodejs-yhbtj.mongodb.net/NodeJs?retryWrites=true`;
     app: express.Application;
     store=new MongoDBStore({
@@ -63,7 +68,7 @@ class Server {
         this.app.use(bodyParser.urlencoded({ extended: false }));
         this.app.use(multer({storage:this.fileStorage,fileFilter:this.fileFilter}).single('file'));
         this.app.use(bodyParser.json());
-       // this.app.use(cors({ origin: 'http://localhost:4200' }));
+        this.app.use(cors({ origin: 'http://localhost:4200' }));
         this.app.use('/images',express.static(path.join(__dirname,'images')))
         this.app.use(morgan('dev'));
         
@@ -100,6 +105,7 @@ class Server {
         })
 
         this.app.use((error:any,req:Request,res:Response,next:NextFunction)=>{
+            console.log(`Express error middleware`)
            const status = error.statusCode || 500;
            const message = error.message;
            res.status(status).json({message:message});
@@ -111,13 +117,9 @@ class Server {
         mongoose.connect(this.MONGODB_URI,{useNewUrlParser:true,useCreateIndex:true})
         .then(()=>{
             console.log(`Connected to MongoDb`);
-            const server = this.app.listen(4000, (err) => {
+            this.app.listen(4000, (err) => {
                 if (err) throw err;
                 console.log('App now listening for requests on port 4000');
-            })
-            const io = require('socket.io')(server);
-            io.on('connection',socket=>{
-                console.log(`Client Connected`);
             })
         })
         .catch(err=>{

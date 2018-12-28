@@ -3,9 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { Course, ICourseModel } from "../models/Course";
 import { validationResult } from "express-validator/check";
-import { startSession } from 'mongoose';
 
-import { Types } from 'mongoose';
 import { User } from "../models/User";
 
 
@@ -83,10 +81,11 @@ export function getCourse(req: Request, res: Response,next:NextFunction): void {
     }
 }
 
-export async function postCourse (req, res: Response,next:NextFunction) {
-    console.log(req.body.title);
+export  function postCourse (req, res: Response,next:NextFunction) {
     const errors=validationResult(req);
+    console.log(errors);
     if(!errors.isEmpty()){
+        console.log(`Error Block`)
        const error = new Error(`Validation Failed Entered Data is Incorect`);
        error['statusCode']=422;
        throw error;
@@ -105,7 +104,7 @@ export async function postCourse (req, res: Response,next:NextFunction) {
         // Storovanje mongoose ID-a
         // _id: new Types.ObjectId(req.body.id)
     })
-        
+
         course.save().then((doc):any => {
             return User.findById(req.userId)
         }).then(user=>{
@@ -228,6 +227,7 @@ export async function getCourseAsync(req: Request, res: Response,next:NextFuncti
             
         }       
 }
+
 
 export async function getCoursesAsync(req: Request, res: Response,next:NextFunction) {
     try {

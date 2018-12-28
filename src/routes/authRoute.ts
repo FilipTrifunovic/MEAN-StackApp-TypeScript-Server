@@ -5,7 +5,7 @@ import { check,validationResult,body } from'express-validator/check';
 
 import { User, IUserModel } from '../models/User';
 import MailService from '../utils/mail';
-import { checkEmailNotTaken, login } from "../controllers/authController";
+import { checkEmailNotTaken, login, postGoogleLogin } from "../controllers/authController";
 
 class AuthRoutes {
     
@@ -185,6 +185,7 @@ class AuthRoutes {
                                     // }) 
                                 ],
                                     this.postRegister);
+        this.router.post('/google/login',postGoogleLogin);
 
     }
 }

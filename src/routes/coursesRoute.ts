@@ -21,8 +21,8 @@ class CoursesRoute {
         this.router.get('/:slug', getCourseAsync);
         this.router.post('/',[
             body('title')
-                .isAlphanumeric()
-                .isLength({min:5})
+                //.isAlphanumeric()
+                //.isLength({min:5})
                 .trim(),
             body('description')
                 //.isURL()

@@ -1,8 +1,8 @@
 export interface IUser {
     createdAt:Date,
-    name:String,
-    email:String,
-    password:string,
+    name:string,
+    email:string,
+    password?:string,
     resetTokent:string,
     resetTokenExpiration:Number
 }

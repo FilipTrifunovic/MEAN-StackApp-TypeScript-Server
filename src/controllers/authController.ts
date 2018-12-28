@@ -2,6 +2,8 @@ import { Request,Response,NextFunction } from 'express';
 import { validationResult } from 'express-validator/check';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import http from 'http';
+import request from 'request';
 
 import { User } from '../models/User';
 
@@ -92,4 +94,55 @@ function generateJWT(email:string,userId:any){
         'secret',
         { expiresIn:'1h'})
         return token;
+}
+
+
+export async function postGoogleLogin(req:Request,res:Response,next:NextFunction){
+    const clientUser= req.body;
+    const authToken = req.body.authToken;
+    let jtw;
+    let userRegistered;
+    console.log(req.body);
+    try {
+        const result:any =await checkGoogleAuthToken(authToken)
+        const googleUser=JSON.parse(result.body);
+        if(clientUser.id!=googleUser.user_id && clientUser.email0!=googleUser.email){
+            const error= new Error(`Token and User doesnt Match`);
+            error['statusCode']=401;
+            throw error;
+        }
+        const user = await User.findOne({email:googleUser.email})
+        if(user){
+           const jwt = generateJWT(user.email,user.id);
+        } else {
+            userRegistered = new User({
+                email : clientUser.email,
+                name  : clientUser.name
+            })
+        }
+        res.status(result.statusCode).json({result:googleUser,jwt:jwt});
+    } catch (err) {
+        if(!err.statusCode){
+            err.statusCode=401;
+        }
+        next(err);
+    }
+}
+
+
+function checkGoogleAuthToken (token:string){
+    return new Promise((resolve,reject)=>{
+        request.get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`,(error,response,body)=>{
+        if(response.statusCode!=200){
+            const error = new Error(`Google authentication token not valid`);
+                error['statusCode']=400;
+                //error['data']=errors;
+            reject(error);
+        } else {
+            resolve(response);
+        }
+    })
+
+    })
+
 }
