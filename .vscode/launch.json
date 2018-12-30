@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug ts-node",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+        "args": [ "${workspaceRoot}/src/server.ts" ],
+        "cwd": "${workspaceRoot}",
+        "protocol": "inspector"
+      }
+    ]
+  }
+
+
+
+
+
+
+
+
+
+
+

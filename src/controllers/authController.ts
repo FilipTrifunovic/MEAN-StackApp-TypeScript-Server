@@ -100,27 +100,36 @@ function generateJWT(email:string,userId:any){
 export async function postGoogleLogin(req:Request,res:Response,next:NextFunction){
     const clientUser= req.body;
     const authToken = req.body.authToken;
-    let jtw;
+    let jwt:string;
     let userRegistered;
     console.log(req.body);
     try {
         const result:any =await checkGoogleAuthToken(authToken)
         const googleUser=JSON.parse(result.body);
-        if(clientUser.id!=googleUser.user_id && clientUser.email0!=googleUser.email){
+        if(clientUser.id!=googleUser.user_id && clientUser.email!=googleUser.email){
             const error= new Error(`Token and User doesnt Match`);
             error['statusCode']=401;
             throw error;
         }
         const user = await User.findOne({email:googleUser.email})
         if(user){
-           const jwt = generateJWT(user.email,user.id);
+           jwt = generateJWT(user.email,user.id);
+           userRegistered=user;
         } else {
-            userRegistered = new User({
+            const user = new User({
                 email : clientUser.email,
                 name  : clientUser.name
             })
+            const newUser= await user.save();
+            if(!newUser){
+                const error= new Error(`Token and User doesnt Match`);
+                error['statusCode']=401;
+                throw error;
+            }
+            jwt=generateJWT(newUser.email,newUser._id)
+            userRegistered= newUser;
         }
-        res.status(result.statusCode).json({result:googleUser,jwt:jwt});
+        res.status(result.statusCode).json({result:userRegistered,jwt:jwt});
     } catch (err) {
         if(!err.statusCode){
             err.statusCode=401;
